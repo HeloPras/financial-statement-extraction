@@ -1,6 +1,10 @@
 "use client"
 
+
+
 import React, { useCallback, useRef, useState } from "react"
+import {convertTables, downloadExcel} from '@/utils/api/excelexport'
+import * as XLSX from "xlsx"
 
 type DropZoneProps = {
   //   onFilesDrop: (files: File[]) => void;
@@ -22,6 +26,8 @@ const [loading, setLoading] = useState(false)
 
   const inputRef = useRef<HTMLInputElement>(null)
   const removeRef = useRef<HTMLButtonElement>(null)
+  
+  const [excel, setExcel] = useState<{title:string,workbook:XLSX.WorkBook | null}>({ title: "", workbook: null})
 
   const validateFiles = (files: File[]) => {
     return files.filter((file) => {
@@ -32,6 +38,9 @@ const [loading, setLoading] = useState(false)
       return isValidType && isValidSize
     })
   }
+
+  
+
 
   const handleFiles = async (files: FileList | null) => {
     console.log("This is the form state", file)
@@ -66,7 +75,12 @@ const [loading, setLoading] = useState(false)
     }
 
     const data = await response.json()
-    console.log(data)
+    console.log("this is the received data from api",data)
+    
+    const formatedData = convertTables(data)
+    console.log("this is the formateed data",formatedData.parsed.profit_and_loss_tables[0].rows)
+
+    downloadExcel(formatedData.parsed,setExcel)
     setLoading(false)
   }
 
@@ -132,12 +146,25 @@ const [loading, setLoading] = useState(false)
               </p>
             </div>
           )}
+
         </div>
       ) : (
         <div>
           <p>Processing...</p>
         </div>
       )}
+
+          {excel.workbook !== null && (
+            <button
+              onClick={() => {
+                if(excel.workbook === null) return
+                XLSX.writeFile(excel.workbook, `${excel.title}.xlsx`)
+              }}
+              className="mt-4 px-4 py-2 bg-blue-500 text-white rounded-lg"
+            >
+              Download
+            </button>
+          )}
     </>
   )
 }

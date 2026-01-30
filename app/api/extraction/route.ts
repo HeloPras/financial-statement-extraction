@@ -245,7 +245,7 @@ async function TextExtractionFromPDF(file: File) {
 
 
 // Initialize the Gemini API
-const genAI = new GoogleGenerativeAI("AIzaSyB6uckxApavGZsUL7kYhQ16rC7VLHfo0Zw");
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
 
 const TableJSONConversion = async (textData: any) => {
   console.log("Converting text into JSON....");

@@ -1,24 +1,43 @@
 import { Dispatch, SetStateAction } from "react"
 import * as XLSX from "xlsx"
 
-export function downloadExcel(data: any,func:Dispatch<SetStateAction<{title:string,workbook:XLSX.WorkBook | null}>>) {
+function resolveFinancialTable(data: any) {
+  const tableKeys = Object.keys(data).filter(
+    (key) => key.endsWith("_tables") && Array.isArray(data[key]) && data[key].length > 0
+  )
 
-  // 1. Extract the rows from your specific JSON structure
-  const tableData = data.profit_and_loss_tables[0]
-  const rows = tableData.rows
+  if (tableKeys.length === 0) {
+    throw new Error("No financial tables found")
+  }
 
-  // 2. Create a worksheet from the JSON array
-  const worksheet = XLSX.utils.json_to_sheet(rows)
+  const tableKey = tableKeys[0] // first available table
+  const table = data[tableKey][0]
 
-  // 3. Create a workbook and add the worksheet
-  const workbook = XLSX.utils.book_new()
-  XLSX.utils.book_append_sheet(workbook, worksheet, "Profit and Loss")
+  const sheetName = tableKey
+    .replace("_tables", "")
+    .replace(/_/g, " ")
+    .replace(/\b\w/g, (c) => c.toUpperCase())
 
-  // 4. Generate buffer and trigger download
-  XLSX.writeFile(workbook, `${tableData.table_title || "Extraction"}.xlsx`)
-  func({title:tableData.table_title || "Extraction",workbook})
-
+  return { table, sheetName }
 }
+
+
+export function downloadExcel(
+  data: any,
+  func: Dispatch<SetStateAction<{ title: string; workbook: XLSX.WorkBook | null }>>
+) {
+  const { table, sheetName } = resolveFinancialTable(data)
+
+  const worksheet = XLSX.utils.json_to_sheet(table.rows)
+  const workbook = XLSX.utils.book_new()
+
+  XLSX.utils.book_append_sheet(workbook, worksheet, sheetName)
+
+  XLSX.writeFile(workbook, `${table.table_title || "Extraction"}.xlsx`)
+
+  func({ title: table.table_title || "Extraction", workbook })
+}
+
 
 function toNumber(value: string | number | null): string | number | null {
   
@@ -59,23 +78,27 @@ function toNumber(value: string | number | null): string | number | null {
   return out
 }
 
-export function convertTables(payload: {parsed:{
-  profit_and_loss_tables: {
-    table_title: string
-    columns:string[]
-    rows: Record<string, string | number | null>[]
-  }[]}
-}): any {
-    const labelCols = ['Particulars']
-    for (let table of payload?.parsed?.profit_and_loss_tables ?? []) {
-      for (let row of table?.rows ?? []) {
-        for (let key of Object.keys(row)) {
-          if (labelCols.includes(key)) continue
-          row[key] = toNumber(row[key])
+type FinancialTable = {
+  table_title: string
+  columns: string[]
+  rows: Record<string, string | number | null>[]
+}
 
+export function convertTables(payload: { parsed: Record<string, any> }) {
+  const labelCols = ["Particulars",'PARTICULARS']
+
+  for (const [key, tables] of Object.entries(payload.parsed ?? {})) {
+    if (!key.endsWith("_tables") || !Array.isArray(tables)) continue
+
+    for (const table of tables as FinancialTable[]) {
+      for (const row of table.rows ?? []) {
+        for (const col of Object.keys(row)) {
+          if (labelCols.includes(col)) continue
+          row[col] = toNumber(row[col])
         }
       }
     }
-    // console.log("this is the payload", payload)
-    return payload // helpful to return it (even though it mutates in place)
   }
+
+  return payload
+}

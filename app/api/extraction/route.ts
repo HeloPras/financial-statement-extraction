@@ -4,7 +4,7 @@ import {
 } from "@aws-sdk/client-bedrock-runtime"
 import { NextRequest, NextResponse } from "next/server"
 import { GoogleGenerativeAI } from "@google/generative-ai";
-import { PandLTextExtraction,PandLJSONConverter } from "@/utils/api/prompts";
+import { PandLTextExtraction,PandLJSONConverter, BalanceSheetTextExtraction, BalanceSheetJSONConverter } from "@/utils/api/prompts";
 
 const client = new BedrockRuntimeClient({
   region: "us-east-1",
@@ -14,10 +14,7 @@ const client = new BedrockRuntimeClient({
 })
 
 
-
-
-async function TextExtractionFromPDF(file: File) {
-  // Load your PDF files as Buffers
+async function TextExtractionFromPDF(file: File, prompt:string) {
 
   console.log("Extracting text from PDF...")
 
@@ -35,7 +32,7 @@ async function TextExtractionFromPDF(file: File) {
             },
           },
           {
-            text: PandLTextExtraction,
+            text: prompt,
           },
         ],
       },
@@ -50,19 +47,18 @@ async function TextExtractionFromPDF(file: File) {
   const response = await client.send(command)
   const rawtext = response.output?.message?.content?.[0]?.text || ""
 
-  const parsed = JSON.parse(rawtext)
-  console.log("this is the parded text after extraction only ",parsed)
+  // const parsed = JSON.parse(rawtext)
+  console.log("this is the raw text after extraction only ",rawtext)
 
 
   console.log("Extraction Complete ✅✅✅ .....")
 
   // return NextResponse.json({rawtext: rawtext ,parsed: parsed })
-  return NextResponse.json({ data: parsed })
+  return rawtext
 }
 
 
-
-const TableJSONConversion = async (textData: string) => {
+const TableJSONConversion = async (textData: string,prompt:string) => {
   console.log("Converting text into JSON using Nova Lite....")
 
   const command = new ConverseCommand({
@@ -75,7 +71,7 @@ const TableJSONConversion = async (textData: string) => {
             text: `INPUT DATA:\n${textData}`,
           },
           {
-            text: PandLJSONConverter,
+            text: prompt,
           },
         ],
       },
@@ -92,10 +88,9 @@ const TableJSONConversion = async (textData: string) => {
     const rawtext = response.output?.message?.content?.[0]?.text || "{}"
 
     console.log("raw text in tablejsonconverter",rawtext)
-    
+
     const jsonResponse = JSON.parse(rawtext)
     
-    console.log("this is the json response", jsonResponse)
     console.log("Conversion complete ✅✅✅ .....")
     return jsonResponse
   } catch (error) {
@@ -105,21 +100,46 @@ const TableJSONConversion = async (textData: string) => {
 }
 
 
+const TableCreationHelper = async (file:File,table_type:string)=>{
+
+let extraction_prompt = "" 
+let coversion_prompt = ""
+
+switch (table_type) {
+  case "ProfitAndLoss":
+    extraction_prompt = PandLTextExtraction 
+    coversion_prompt = PandLJSONConverter
+    break;
+  
+  case "BalanceSheet":
+    extraction_prompt = BalanceSheetTextExtraction
+    coversion_prompt = BalanceSheetJSONConverter
+
+  default:
+    // extraction_prompt = PandLTextExtraction 
+    // coversion_prompt = PandLJSONConverter
+    break;
+}
+
+  const extracted_text = await TextExtractionFromPDF(file,extraction_prompt)
+
+  console.log("This is raw data before json converter",extracted_text);
+
+  // const jsonData = JSON.stringify(extracted_text)
+
+  const tableData = await TableJSONConversion(extracted_text,coversion_prompt)
+
+  return tableData
+}
+
+
 
 export async function POST(req: NextRequest) {
+
   const formData = await req.formData()
   const file = formData.get("file") as File
 
-  const rawResponse = await TextExtractionFromPDF(file)
-  const rawData = await   rawResponse.json()
-  console.log("This is raw data before json converter",rawData);
-
-  const jsonData = JSON.stringify(rawData)
-
-  
-  console.log("this is the json data before json converter",jsonData)
-
-  const tableData = await TableJSONConversion(jsonData)
+  const tableData = await TableCreationHelper(file,"BalanceSheet")
 
 
   return NextResponse.json({ parsed: tableData })

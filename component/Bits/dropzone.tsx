@@ -56,6 +56,7 @@ const [loading, setLoading] = useState(false)
     form.append("file", validFiles[0])
 
     setLoading(true)
+
     const response = await fetch("/api/extraction", {
       method: "POST",
       body: form,
@@ -67,11 +68,13 @@ const [loading, setLoading] = useState(false)
       try {
         const errorData = await response.json()
         console.error("Error details:", errorData)
+        setLoading(false)
       } catch {
         const errorText = await response.text()
         console.error("Error response:", errorText)
+
+        setLoading(false)
       }
-      setLoading(false)
       return
     }
 
@@ -79,7 +82,7 @@ const [loading, setLoading] = useState(false)
     console.log("this is the received data from api",data)
     
     const formatedData = convertTables(data)
-    console.log("this is the formateed data",formatedData.parsed.profit_and_loss_tables[0].rows)
+    console.log("this is the formateed data",formatedData.parsed)
 
     downloadExcel(formatedData.parsed,setExcel)
     setLoading(false)

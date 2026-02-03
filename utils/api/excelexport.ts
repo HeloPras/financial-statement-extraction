@@ -22,13 +22,13 @@ export function downloadExcel(data: any,func:Dispatch<SetStateAction<{title:stri
 
 function toNumber(value: string | number | null): string | number | null {
   
-  console.log("toNumber input:", value, "type:", typeof value)
+  // console.log("toNumber input:", value, "type:", typeof value)
 
   if (value === null || value === undefined) return null
   if (typeof value === "number") return value
 
   let s = String(value).trim()
-  console.log("string after trim:", JSON.stringify(s))
+  // console.log("string after trim:", JSON.stringify(s))
 
   const lower = s.toLowerCase()
   if (s === "" || s === "-" || s === "—" || lower === "n/a" || lower === "na")
@@ -43,7 +43,7 @@ function toNumber(value: string | number | null): string | number | null {
   s = s.replace(/,/g, "")
 
   const cleaned = s.replace(/[^0-9.\-]/g, "")
-  console.log("cleaned:", JSON.stringify(cleaned), "isParenNeg:", isParenNeg)
+  // console.log("cleaned:", JSON.stringify(cleaned), "isParenNeg:", isParenNeg)
 
   // if (!/^-?\d+(\.\d+)?$/.test(cleaned)) {
   //   console.log("NOT numeric -> returning original")
@@ -55,7 +55,7 @@ function toNumber(value: string | number | null): string | number | null {
     : Number.parseInt(cleaned, 10)
   const out = isParenNeg ? -Math.abs(num) : num
 
-  console.log("converted ->", out)
+  // console.log("converted ->", out)
   return out
 }
 
@@ -76,6 +76,6 @@ export function convertTables(payload: {parsed:{
         }
       }
     }
-    console.log("this is the payload", payload)
+    // console.log("this is the payload", payload)
     return payload // helpful to return it (even though it mutates in place)
   }

@@ -71,6 +71,7 @@ const [loading, setLoading] = useState(false)
         const errorText = await response.text()
         console.error("Error response:", errorText)
       }
+      setLoading(false)
       return
     }
 

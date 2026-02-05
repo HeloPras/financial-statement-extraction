@@ -3,7 +3,7 @@
 
 
 import React, { useCallback, useRef, useState } from "react"
-import {convertTables, downloadExcel} from '@/utils/api/excelexport'
+import {downloadExcel} from '@/utils/api/excelexport'
 import * as XLSX from "xlsx"
 
 type DropZoneProps = {
@@ -16,7 +16,7 @@ type DropZoneProps = {
 const DropZone: React.FC<DropZoneProps> = ({
   //   onFilesDrop,
   accept = [],
-  maxSizeMB = 5,
+  maxSizeMB = 10,
   multiple = true,
 }) => {
   const [isDragging, setIsDragging] = useState(false)
@@ -63,6 +63,8 @@ const [loading, setLoading] = useState(false)
     })
 
     if (!response.ok) {
+
+      setLoading(false)
       console.error("API Error:", response.status, response.statusText)
       // Try to parse error as JSON, fallback to text
       try {
@@ -81,10 +83,7 @@ const [loading, setLoading] = useState(false)
     const data = await response.json()
     console.log("this is the received data from api",data)
     
-    const formatedData = convertTables(data)
-    console.log("this is the formateed data",formatedData.parsed)
-
-    downloadExcel(formatedData.parsed,setExcel)
+    downloadExcel(data,setExcel)
     setLoading(false)
   }
 

@@ -4,7 +4,7 @@ import {
 } from "@aws-sdk/client-bedrock-runtime"
 import { NextRequest, NextResponse } from "next/server"
 import { GoogleGenerativeAI } from "@google/generative-ai";
-import { PandLTextExtraction,PandLJSONConverter, BalanceSheetTextExtraction, BalanceSheetJSONConverter } from "@/utils/api/prompts";
+import { PandLTextExtraction,PandLJSONConverter, BalanceSheetTextExtraction, BalanceSheetJSONConverter,tempBStable } from "@/utils/api/prompts";
 
 const client = new BedrockRuntimeClient({
   region: "us-east-1",
@@ -13,13 +13,34 @@ const client = new BedrockRuntimeClient({
   },
 })
 
+function cleanLLMJson(raw: string): string {
+  if (!raw) return "{}"
+
+  if(raw.includes("`")){
+
+  return raw
+    .replace(/^\s*```json\s*/i, "")
+    .replace(/^\s*```\s*/i, "")
+    .replace(/\s*```\s*$/i, "")
+    .trim()
+
+}
+
+return raw
+}
+
+// const columnAdjustment = (tableJSON:string)=>{
+
+
+// }
+
 
 async function TextExtractionFromPDF(file: File, prompt:string) {
 
   console.log("Extracting text from PDF...")
 
   const command = new ConverseCommand({
-    modelId: "us.amazon.nova-lite-v1:0",
+    modelId: "us.amazon.nova-2-lite-v1:0",
     messages: [
       {
         role: "user",
@@ -50,11 +71,12 @@ async function TextExtractionFromPDF(file: File, prompt:string) {
   // const parsed = JSON.parse(rawtext)
   console.log("this is the raw text after extraction only ",rawtext)
 
+  const cleanedJson = cleanLLMJson(rawtext)
 
   console.log("Extraction Complete ✅✅✅ .....")
 
   // return NextResponse.json({rawtext: rawtext ,parsed: parsed })
-  return rawtext
+  return cleanedJson
 }
 
 
@@ -62,7 +84,7 @@ const TableJSONConversion = async (textData: string,prompt:string) => {
   console.log("Converting text into JSON using Nova Lite....")
 
   const command = new ConverseCommand({
-    modelId: "us.amazon.nova-lite-v1:0",
+    modelId: "us.amazon.nova-2-lite-v1:0",
     messages: [
       {
         role: "user",
@@ -89,7 +111,12 @@ const TableJSONConversion = async (textData: string,prompt:string) => {
 
     console.log("raw text in tablejsonconverter",rawtext)
 
-    const jsonResponse = JSON.parse(rawtext)
+    const cleanedJson = cleanLLMJson(rawtext)
+
+    const jsonResponse = JSON.parse(cleanedJson)
+
+
+
     
     console.log("Conversion complete ✅✅✅ .....")
     return jsonResponse
@@ -113,7 +140,7 @@ switch (table_type) {
   
   case "BalanceSheet":
     extraction_prompt = BalanceSheetTextExtraction
-    coversion_prompt = BalanceSheetJSONConverter
+    coversion_prompt = tempBStable
 
   default:
     // extraction_prompt = PandLTextExtraction 
@@ -128,6 +155,8 @@ switch (table_type) {
   // const jsonData = JSON.stringify(extracted_text)
 
   const tableData = await TableJSONConversion(extracted_text,coversion_prompt)
+
+
 
   return tableData
 }

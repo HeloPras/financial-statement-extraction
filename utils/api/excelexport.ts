@@ -33,9 +33,7 @@ function resolveFinancialTable(data: any) {
 }
 
 const renameTableColumns = (data: FinancialTable) => {
-
-  console.log("We are inside the renaming table function yaay 😘😘😘😘");
-  
+  console.log("We are inside the renaming table function yaay 😘😘😘😘")
 
   for (const reference of data.columns) {
     for (let i = 1; i < data.columns.length; i++) {
@@ -46,7 +44,7 @@ const renameTableColumns = (data: FinancialTable) => {
   }
 
   const rowKeys = Object.keys(data.rows[0])
-  console.log("this is the row keys",rowKeys)
+  console.log("this is the row keys", rowKeys)
 
   // for(let row of data.rows ){
   //   for(let key of rowKeys){
@@ -67,7 +65,7 @@ const renameTableColumns = (data: FinancialTable) => {
     }
   })
 
-  console.log("this is the data after renaming",data)
+  console.log("this is the data after renaming", data)
 
   return data
 }
@@ -126,27 +124,47 @@ function convertTables(payload: { parsed: Record<string, any> }) {
 
 export function downloadExcel(
   data: any,
+  extractTables: ExtractTableTypes,
   func: Dispatch<
     SetStateAction<{ title: string; workbook: XLSX.WorkBook | null }>
   >,
 ) {
-  let formattedData = convertTables(data)
-
-  console.log("this is the formatted data", formattedData)
-
-  // formattedData = renameTableColumns(formattedData)
-  let { table, sheetName } = resolveFinancialTable(formattedData.parsed)
-
-  console.log("Renaming columns starting.......😫😫")
-  table = renameTableColumns(table)
-  console.log("Renaming completed......✅✅✅")
-
-  const worksheet = XLSX.utils.json_to_sheet(table.rows)
   const workbook = XLSX.utils.book_new()
 
-  XLSX.utils.book_append_sheet(workbook, worksheet, sheetName)
+  if (extractTables.PandL) {
+    let formattedPLData = convertTables({ parsed: data.ProfitAndLoss })
+    let { table, sheetName } = resolveFinancialTable(formattedPLData.parsed)
+    const worksheet = XLSX.utils.json_to_sheet(table.rows)
+    XLSX.utils.book_append_sheet(workbook, worksheet, sheetName)
+  }
 
-  XLSX.writeFile(workbook, `${table.table_title || "Extraction"}.xlsx`)
+  if (extractTables.BalanceSheet) {
+    let formattedBalanceSheetData = convertTables({ parsed: data.BalanceSheet })
+    let { table, sheetName } = resolveFinancialTable(
+      formattedBalanceSheetData.parsed,
+    )
 
-  func({ title: table.table_title || "Extraction", workbook })
+    const worksheet = XLSX.utils.json_to_sheet(table.rows)
+    XLSX.utils.book_append_sheet(workbook, worksheet, sheetName)
+  }
+
+  if (extractTables.CashFlow) {
+    let formattedCashFlowData = convertTables({ parsed: data.CashFlow })
+    let { table, sheetName } = resolveFinancialTable(
+      formattedCashFlowData.parsed,
+    )
+    const worksheet = XLSX.utils.json_to_sheet(table.rows)
+    XLSX.utils.book_append_sheet(workbook, worksheet, sheetName)
+  }
+
+  // let formattedData = convertTables(data)
+
+  // console.log("this is the formatted data", formattedData)
+
+  // let { table, sheetName } = resolveFinancialTable(formattedData.parsed)
+
+  // XLSX.writeFile(workbook, `${table.table_title || " Financial_Extraction"}.xlsx`)
+  XLSX.writeFile(workbook, `Financial_Extraction.xlsx`)
+
+  func({ title: "Financial_Extraction", workbook })
 }

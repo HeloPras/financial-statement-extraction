@@ -4,7 +4,8 @@ import {
 } from "@aws-sdk/client-bedrock-runtime"
 import { NextRequest, NextResponse } from "next/server"
 import { GoogleGenerativeAI } from "@google/generative-ai";
-import { PandLTextExtraction,PandLJSONConverter, BalanceSheetTextExtraction, BalanceSheetJSONConverter,tempBStable } from "@/utils/api/prompts";
+import { PandLTextExtraction,PandLJSONConverter, BalanceSheetTextExtraction, BalanceSheetJSONConverter,CashFlowJSONConverter,CashFlowTextExtraction } from "@/utils/api/prompts";
+import { table } from "console";
 
 const client = new BedrockRuntimeClient({
   region: "us-east-1",
@@ -127,39 +128,57 @@ const TableJSONConversion = async (textData: string,prompt:string) => {
 }
 
 
-const TableCreationHelper = async (file:File,table_type:string)=>{
+const TableCreationHelper = async (file:File,table_type:ExtractTableTypes)=>{
 
 let extraction_prompt = "" 
 let coversion_prompt = ""
+let PandLTableData 
+let BalanceSheetTableData 
+let CashFlowTableData 
 
-switch (table_type) {
-  case "ProfitAndLoss":
-    extraction_prompt = PandLTextExtraction 
-    coversion_prompt = PandLJSONConverter
-    break;
-  
-  case "BalanceSheet":
-    extraction_prompt = BalanceSheetTextExtraction
-    coversion_prompt = tempBStable
+    if(table_type.PandL){
+      extraction_prompt = PandLTextExtraction 
+      coversion_prompt = PandLJSONConverter
+      const extracted_text = await TextExtractionFromPDF(file,extraction_prompt)
+      PandLTableData = await TableJSONConversion(extracted_text,coversion_prompt)
+    }
 
-  default:
-    // extraction_prompt = PandLTextExtraction 
-    // coversion_prompt = PandLJSONConverter
-    break;
-}
+    if(table_type.BalanceSheet){
+      extraction_prompt = BalanceSheetTextExtraction
+      coversion_prompt = BalanceSheetJSONConverter
+      const extracted_text = await TextExtractionFromPDF(file,extraction_prompt)
+      BalanceSheetTableData = await TableJSONConversion(extracted_text,coversion_prompt)
 
-  const extracted_text = await TextExtractionFromPDF(file,extraction_prompt)
+    }
 
-  console.log("This is raw data before json converter",extracted_text);
+    if(table_type.CashFlow){
+      extraction_prompt = CashFlowTextExtraction
+      coversion_prompt = CashFlowJSONConverter
+      const extracted_text = await TextExtractionFromPDF(file,extraction_prompt)
+      CashFlowTableData = await TableJSONConversion(extracted_text,coversion_prompt)
+
+    }
+
+  // const extracted_text = await TextExtractionFromPDF(file,extraction_prompt)
+
+  // console.log("This is raw data before json converter",extracted_text);
 
   // const jsonData = JSON.stringify(extracted_text)
 
-  const tableData = await TableJSONConversion(extracted_text,coversion_prompt)
+  // const tableData = await TableJSONConversion(extracted_text,coversion_prompt)
 
 
 
-  return tableData
+
+  return {
+    ProfitAndLoss:PandLTableData,
+    BalanceSheet:BalanceSheetTableData,
+    CashFlow:CashFlowTableData
+  }
+
+
 }
+
 
 
 
@@ -168,8 +187,16 @@ export async function POST(req: NextRequest) {
   const formData = await req.formData()
   const file = formData.get("file") as File
 
-  const tableData = await TableCreationHelper(file,"BalanceSheet")
+  const tablesToExtract = JSON.parse(formData.get("tablesToExtract") as string)
+
+  console.log("tis is the tables to extract",tablesToExtract) 
+
+// ProfitAndLoss
+// BalanceSheet
+// CashFlow
+
+  const tableData = await TableCreationHelper(file,tablesToExtract)
 
 
-  return NextResponse.json({ parsed: tableData })
+  return NextResponse.json({ ProfitAndLoss: tableData.ProfitAndLoss,BalanceSheet:tableData.BalanceSheet,CashFlow:tableData.CashFlow })
 }

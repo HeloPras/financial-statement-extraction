@@ -187,6 +187,8 @@ export async function POST(req: NextRequest) {
   const formData = await req.formData()
   const file = formData.get("file") as File
 
+  console.log(file)
+
   const tablesToExtract = JSON.parse(formData.get("tablesToExtract") as string)
 
   console.log("tis is the tables to extract",tablesToExtract) 
@@ -199,4 +201,5 @@ export async function POST(req: NextRequest) {
 
 
   return NextResponse.json({ ProfitAndLoss: tableData.ProfitAndLoss,BalanceSheet:tableData.BalanceSheet,CashFlow:tableData.CashFlow })
+  // return NextResponse.json({data:file.name})
 }

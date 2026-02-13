@@ -32,43 +32,6 @@ function resolveFinancialTable(data: any) {
   return { table, sheetName }
 }
 
-const renameTableColumns = (data: FinancialTable) => {
-  console.log("We are inside the renaming table function yaay 😘😘😘😘")
-
-  for (const reference of data.columns) {
-    for (let i = 1; i < data.columns.length; i++) {
-      if (reference == data.columns[i]) {
-        data.columns[i] = reference + "_" + i
-      }
-    }
-  }
-
-  const rowKeys = Object.keys(data.rows[0])
-  console.log("this is the row keys", rowKeys)
-
-  // for(let row of data.rows ){
-  //   for(let key of rowKeys){
-
-  //     row[data.columns[key]] = row[key]
-  //   }
-  // }
-
-  data.rows.forEach((row: any) => {
-    for (const key of rowKeys) {
-      let count = 0
-      row[data.columns[count]] = row[key]
-      delete row[key]
-      count++
-      if (count == rowKeys.length) {
-        count = 0
-      }
-    }
-  })
-
-  console.log("this is the data after renaming", data)
-
-  return data
-}
 
 function toNumber(value: string | number | null): string | number | null {
   // this function changes the value of cell from string to number
@@ -157,6 +120,7 @@ export function downloadExcel(
     XLSX.utils.book_append_sheet(workbook, worksheet, sheetName)
   }
 
+
   // let formattedData = convertTables(data)
 
   // console.log("this is the formatted data", formattedData)
@@ -164,6 +128,7 @@ export function downloadExcel(
   // let { table, sheetName } = resolveFinancialTable(formattedData.parsed)
 
   // XLSX.writeFile(workbook, `${table.table_title || " Financial_Extraction"}.xlsx`)
+
   XLSX.writeFile(workbook, `Financial_Extraction.xlsx`)
 
   func({ title: "Financial_Extraction", workbook })

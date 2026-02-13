@@ -138,59 +138,365 @@ const selectedCount = useMemo(() => {
       return
     }
 
-    const responseData = []
-
-    for (let i = 0; i < files.length; i++) {
-      
-      const form = new FormData()
-      form.append("file", files[i])
-      form.append("tablesToExtract", JSON.stringify(extractTables))
-
-      setLoading(true)
-      try {
-        const response = await fetch("/api/extraction", {
-          method: "POST",
-          body: form,
-        })
-
-        if (!response.ok) {
-          let msg = `Request failed (${response.status}).`
-          responseData.push({
-            name: files[i].name,
-            status: "failed",
-            message: msg,
-          })
-          try {
-            const err = await response.json()
-            msg = err?.message || err?.error || msg
-          } catch {
-            const txt = await response.text()
-            if (txt) msg = txt
-          }
-          setError(msg)
-          return
+    const responseData = [
+    {
+        "name": "Radiant Infotech_Provisional_Poush, 2082.pdf",
+        "status": "success",
+        "data": {
+            "ProfitAndLoss": {
+                "profit_and_loss_tables": [
+                    {
+                        "table_title": "M/S Radiant Infotech Nepal Pvt. Ltd.\nKathmandu, Nepal\n\nStatement of Income\nAs at 30th Poush 2082 (14th January 2026)",
+                        "columns": [
+                            "Particulars",
+                            "Notes",
+                            "F.Y. 2082-83",
+                            "F.Y. 2081-82"
+                        ],
+                        "rows": [
+                            {
+                                "Particulars": "Income",
+                                "Notes": "",
+                                "F.Y. 2082-83": "",
+                                "F.Y. 2081-82": ""
+                            },
+                            {
+                                "Particulars": "Revenue from Operations",
+                                "Notes": "4.11",
+                                "F.Y. 2082-83": "4,77,19,213",
+                                "F.Y. 2081-82": "16,09,63,917"
+                            },
+                            {
+                                "Particulars": "Other Income",
+                                "Notes": "",
+                                "F.Y. 2082-83": "-",
+                                "F.Y. 2081-82": "-"
+                            },
+                            {
+                                "Particulars": "Total Income",
+                                "Notes": "",
+                                "F.Y. 2082-83": "4,77,19,213",
+                                "F.Y. 2081-82": "16,09,63,917"
+                            },
+                            {
+                                "Particulars": "Expenses",
+                                "Notes": "",
+                                "F.Y. 2082-83": "",
+                                "F.Y. 2081-82": ""
+                            },
+                            {
+                                "Particulars": "Cost of Sales",
+                                "Notes": "4.12",
+                                "F.Y. 2082-83": "2,63,91,650",
+                                "F.Y. 2081-82": "9,98,04,646"
+                            },
+                            {
+                                "Particulars": "Employee Benefit Expenses",
+                                "Notes": "4.13",
+                                "F.Y. 2082-83": "53,61,000",
+                                "F.Y. 2081-82": "97,48,000"
+                            },
+                            {
+                                "Particulars": "Administrative and Operating Expenses",
+                                "Notes": "4.14",
+                                "F.Y. 2082-83": "43,83,494",
+                                "F.Y. 2081-82": "78,84,676"
+                            },
+                            {
+                                "Particulars": "Other Expenses",
+                                "Notes": "",
+                                "F.Y. 2082-83": "-",
+                                "F.Y. 2081-82": "-"
+                            },
+                            {
+                                "Particulars": "Finance Costs",
+                                "Notes": "4.15",
+                                "F.Y. 2082-83": "21,05,921",
+                                "F.Y. 2081-82": "1,26,85,045"
+                            },
+                            {
+                                "Particulars": "Depreciation and Amortization Expenses",
+                                "Notes": "4.1.2",
+                                "F.Y. 2082-83": "-",
+                                "F.Y. 2081-82": "1,83,06,538"
+                            },
+                            {
+                                "Particulars": "Total Expenses",
+                                "Notes": "",
+                                "F.Y. 2082-83": "3,82,42,065",
+                                "F.Y. 2081-82": "14,84,28,905"
+                            },
+                            {
+                                "Particulars": "Profit/(Loss) Before Tax",
+                                "Notes": "",
+                                "F.Y. 2082-83": "94,77,148",
+                                "F.Y. 2081-82": "1,25,35,012"
+                            },
+                            {
+                                "Particulars": "Income Tax Expense",
+                                "Notes": "",
+                                "F.Y. 2082-83": "18,95,430",
+                                "F.Y. 2081-82": "30,61,016"
+                            },
+                            {
+                                "Particulars": "Deferred Tax Expenses",
+                                "Notes": "",
+                                "F.Y. 2082-83": "",
+                                "F.Y. 2081-82": "86782"
+                            },
+                            {
+                                "Particulars": "Net Profit/(Loss) for the year",
+                                "Notes": "",
+                                "F.Y. 2082-83": "75,81,719",
+                                "F.Y. 2081-82": "93,87,214"
+                            }
+                        ]
+                    }
+                ]
+            }
         }
-
-        const data = await response.json()
-        responseData.push({
-          name: files[i].name,
-          status: "success",
-          data: data,
-        })
-
-        if(!extractTables.Historical){
-          downloadExcel(data, extractTables, setExcel)
+    },
+    {
+        "name": "SAIL-2ndQuarterly-Report.pdf",
+        "status": "success",
+        "data": {
+            "ProfitAndLoss": {
+                "profit_and_loss_tables": [
+                    {
+                        "table_title": "Statement of Standalone Profit or Loss and other Comprehensive Income",
+                        "columns": [
+                            "Particulars",
+                            "Poush End 2082",
+                            "Poush End 2081"
+                        ],
+                        "rows": [
+                            {
+                                "Particulars": "Revenue",
+                                "Poush End 2082": "878,621,946",
+                                "Poush End 2081": "548,190,573"
+                            },
+                            {
+                                "Particulars": "Cost of sales",
+                                "Poush End 2082": "763,919,497",
+                                "Poush End 2081": "452,783,310"
+                            },
+                            {
+                                "Particulars": "Gross profit / (loss)",
+                                "Poush End 2082": "114,702,449",
+                                "Poush End 2081": "95,407,263"
+                            },
+                            {
+                                "Particulars": "Other income",
+                                "Poush End 2082": "3,783,981",
+                                "Poush End 2081": "4,149,697"
+                            },
+                            {
+                                "Particulars": "Administrative expenses",
+                                "Poush End 2082": "29,871,319",
+                                "Poush End 2081": "27,362,661"
+                            },
+                            {
+                                "Particulars": "Employee expense",
+                                "Poush End 2082": "27,942,337",
+                                "Poush End 2081": "27,442,614"
+                            },
+                            {
+                                "Particulars": "Depreciation",
+                                "Poush End 2082": "11,934,637",
+                                "Poush End 2081": "8,539,935"
+                            },
+                            {
+                                "Particulars": "Amortization",
+                                "Poush End 2082": "-",
+                                "Poush End 2081": "-"
+                            },
+                            {
+                                "Particulars": "Operating profit / (loss)",
+                                "Poush End 2082": "48,738,137",
+                                "Poush End 2081": "36,211,750"
+                            },
+                            {
+                                "Particulars": "Finance Income",
+                                "Poush End 2082": "-",
+                                "Poush End 2081": "-"
+                            },
+                            {
+                                "Particulars": "Finance costs",
+                                "Poush End 2082": "32,891,872",
+                                "Poush End 2081": "29,664,422"
+                            },
+                            {
+                                "Particulars": "Profit / (loss) before staff bonus",
+                                "Poush End 2082": "15,846,265",
+                                "Poush End 2081": "6,547,327"
+                            },
+                            {
+                                "Particulars": "Staff bonus",
+                                "Poush End 2082": "-",
+                                "Poush End 2081": "-"
+                            },
+                            {
+                                "Particulars": "Profit / (loss) before tax",
+                                "Poush End 2082": "15,846,265",
+                                "Poush End 2081": "6,547,327"
+                            },
+                            {
+                                "Particulars": "Income tax expenses of current year",
+                                "Poush End 2082": "-",
+                                "Poush End 2081": "-"
+                            },
+                            {
+                                "Particulars": "Income tax expenses of previous years",
+                                "Poush End 2082": "190,167",
+                                "Poush End 2081": "1,481,577"
+                            },
+                            {
+                                "Particulars": "Deferred tax expenses (income)",
+                                "Poush End 2082": "-",
+                                "Poush End 2081": "-"
+                            },
+                            {
+                                "Particulars": "Net profit / (loss) for the year",
+                                "Poush End 2082": "15,656,098",
+                                "Poush End 2081": "5,065,750"
+                            },
+                            {
+                                "Particulars": "Other comprehensive income",
+                                "Poush End 2082": "",
+                                "Poush End 2081": ""
+                            },
+                            {
+                                "Particulars": "a) Items that will be reclassified to Profit or loss",
+                                "Poush End 2082": "-",
+                                "Poush End 2081": "-"
+                            },
+                            {
+                                "Particulars": "b) Items that may not be reclassified Profit or loss",
+                                "Poush End 2082": "-",
+                                "Poush End 2081": "-"
+                            },
+                            {
+                                "Particulars": "Other comprehensive income / (loss) for the year",
+                                "Poush End 2082": "-",
+                                "Poush End 2081": "-"
+                            },
+                            {
+                                "Particulars": "Total comprehensive income",
+                                "Poush End 2082": "15,656,098",
+                                "Poush End 2081": "5,065,750"
+                            },
+                            {
+                                "Particulars": "Profit for the Year attributable to :",
+                                "Poush End 2082": "",
+                                "Poush End 2081": ""
+                            },
+                            {
+                                "Particulars": "Owner of the Company",
+                                "Poush End 2082": "15,656,098",
+                                "Poush End 2081": "5,065,750"
+                            },
+                            {
+                                "Particulars": "Total Comprehensive Income attributable to :",
+                                "Poush End 2082": "",
+                                "Poush End 2081": ""
+                            },
+                            {
+                                "Particulars": "Owner of the Company",
+                                "Poush End 2082": "-",
+                                "Poush End 2081": "-"
+                            },
+                            {
+                                "Particulars": "Total comprehensive income",
+                                "Poush End 2082": "15,656,098",
+                                "Poush End 2081": "5,065,750"
+                            },
+                            {
+                                "Particulars": "Earning per Equity share",
+                                "Poush End 2082": "",
+                                "Poush End 2081": ""
+                            },
+                            {
+                                "Particulars": "Basic (NPR.)",
+                                "Poush End 2082": "1.03",
+                                "Poush End 2081": "0.39"
+                            },
+                            {
+                                "Particulars": "Diluted (NPR.)",
+                                "Poush End 2082": "1.03",
+                                "Poush End 2081": "0.39"
+                            }
+                        ]
+                    }
+                ]
+            }
         }
-
-        setSuccess("Extraction completed. You can download the Excel file now.")
-      } catch (e: any) {
-        setError(e?.message || "Something went wrong while extracting.")
-      } finally {
-        setLoading(false)
-      }
     }
+]
 
-    console.log('responseData',responseData)
+    // for (let i = 0; i < files.length; i++) {
+      
+    //   const form = new FormData()
+    //   form.append("file", files[i])
+    //   form.append("tablesToExtract", JSON.stringify(extractTables))
+
+    //   setLoading(true)
+    //   try {
+    //     const response = await fetch("/api/extraction", {
+    //       method: "POST",
+    //       body: form,
+    //     })
+
+    //     if (!response.ok) {
+    //       let msg = `Request failed (${response.status}).`
+    //       responseData.push({
+    //         name: files[i].name,
+    //         status: "failed",
+    //         message: msg,
+    //       })
+    //       try {
+    //         const err = await response.json()
+    //         msg = err?.message || err?.error || msg
+    //       } catch {
+    //         const txt = await response.text()
+    //         if (txt) msg = txt
+    //       }
+    //       setError(msg)
+    //       return
+    //     }
+
+    //     const data = await response.json()
+    //     responseData.push({
+    //       name: files[i].name,
+    //       status: "success",
+    //       data: data,
+    //     })
+
+    //     if(!extractTables.Historical){
+    //       downloadExcel(data, extractTables, setExcel)
+    //     }
+
+    //     setSuccess("Extraction completed. You can download the Excel file now.")
+    //   } catch (e: any) {
+    //     setError(e?.message || "Something went wrong while extracting.")
+    //   } finally {
+    //     setLoading(false)
+    //   }
+    // }
+
+    if (extractTables.Historical) {
+      console.log("responseData", responseData)
+
+      try {
+        const response = await fetch("/api/historicaltable", {
+          method: "POST",
+          body: JSON.stringify(responseData),
+
+        }) 
+      } catch (error) {
+        
+      }
+
+    }
   }
 
 
@@ -241,7 +547,8 @@ const selectedCount = useMemo(() => {
                   ref={inputRef}
                   type="file"
                   hidden
-                  multiple={extractTables.Historical ? true : false}
+                  // multiple={extractTables.Historical ? true : false}
+                  multiple={true}
                   // accept={extractTables.Historical ? "" : accept.join(",")}
                   accept=".pdf"
                   onChange={(e) => handlePick(e.target.files)}

@@ -64,12 +64,29 @@ function toNumber(value: string | number | null): string | number | null {
   return out
 }
 
-function convertTables(payload: { parsed: Record<string, any> }) {
+function convertTables(payload: { parsed: Record<string, any> },historical:boolean) {
   // this function chooses which column exclude from conversion like Particular table and calls toNumber function to convert string to number
 
   const labelCols = ["Particulars", "PARTICULARS"]
 
+if(historical){
+      for (const row of payload.parsed.rows ?? []) {
+        for (const col of Object.keys(row)) {
+          if (labelCols.includes(col)) continue
+          row[col] = toNumber(row[col])
+        }
+      }
+      return payload
+    }
+
+
+  console.log("this is the payload",payload)
+
   for (const [key, tables] of Object.entries(payload.parsed ?? {})) {
+
+    console.log("this is the key",key)
+    console.log("this is the tables",tables)
+
     if (!key.endsWith("_tables") || !Array.isArray(tables)) continue
 
     for (const table of tables as FinancialTable[]) {
@@ -94,15 +111,18 @@ export function downloadExcel(
 ) {
   const workbook = XLSX.utils.book_new()
 
-  if (extractTables.PandL) {
-    let formattedPLData = convertTables({ parsed: data.ProfitAndLoss })
+  if(!extractTables.Historical){
+
+if (extractTables.PandL) {
+    let formattedPLData = convertTables({ parsed: data.ProfitAndLoss },extractTables.Historical)
     let { table, sheetName } = resolveFinancialTable(formattedPLData.parsed)
     const worksheet = XLSX.utils.json_to_sheet(table.rows)
     XLSX.utils.book_append_sheet(workbook, worksheet, sheetName)
   }
 
+
   if (extractTables.BalanceSheet) {
-    let formattedBalanceSheetData = convertTables({ parsed: data.BalanceSheet })
+    let formattedBalanceSheetData = convertTables({ parsed: data.BalanceSheet },extractTables.Historical)
     let { table, sheetName } = resolveFinancialTable(
       formattedBalanceSheetData.parsed,
     )
@@ -112,13 +132,36 @@ export function downloadExcel(
   }
 
   if (extractTables.CashFlow) {
-    let formattedCashFlowData = convertTables({ parsed: data.CashFlow })
+    let formattedCashFlowData = convertTables({ parsed: data.CashFlow },extractTables.Historical)
     let { table, sheetName } = resolveFinancialTable(
       formattedCashFlowData.parsed,
     )
     const worksheet = XLSX.utils.json_to_sheet(table.rows)
     XLSX.utils.book_append_sheet(workbook, worksheet, sheetName)
   }
+
+  }
+
+  else{
+    if(extractTables.PandL){
+        let formattedPLDataLData = convertTables({parsed:data.ProfitAndLoss},extractTables.Historical)
+        const worksheet = XLSX.utils.json_to_sheet(formattedPLDataLData.parsed.rows)
+        XLSX.utils.book_append_sheet(workbook, worksheet, "Historical_ProfitAndLoss")
+    }
+
+    if(extractTables.BalanceSheet){
+      let formattedBalanceSheetData = convertTables({parsed:data.BalanceSheet},extractTables.Historical)
+      const worksheet = XLSX.utils.json_to_sheet(formattedBalanceSheetData.parsed.rows)
+      XLSX.utils.book_append_sheet(workbook, worksheet, "Historical_BalanceSheet")
+    }
+
+    if(extractTables.CashFlow){
+      let formattedCashFlowData = convertTables({parsed:data.CashFlow},extractTables.Historical)
+      const worksheet = XLSX.utils.json_to_sheet(formattedCashFlowData.parsed.rows)
+      XLSX.utils.book_append_sheet(workbook, worksheet, "Historical_CashFlow") 
+    }
+  }
+  
 
 
   // let formattedData = convertTables(data)

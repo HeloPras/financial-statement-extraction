@@ -96,21 +96,21 @@ const historicalTableHelper = async (data: any,tablesToExtract:ExtractTableTypes
   }
 
 
-  if(tablesToExtract.CashFlow){
-    for(let i in data){
-      cashFlowData.push(data[i].data.CashFlow.cash_flow_tables)
-    }
+  // if(tablesToExtract.CashFlow){
+  //   for(let i in data){
+  //     cashFlowData.push(data[i].data.CashFlow.cash_flow_tables)
+  //   }
 
-    console.log("this is the pushed data",cashFlowData)
-    let response = await createHistoricalTable(cashFlowData,HistoricalCFTablePrompt)
-    console.log("this is the response",response) 
-    cashFlowResult = response.historical_cash_flow_table
+  //   console.log("this is the pushed data",cashFlowData)
+  //   let response = await createHistoricalTable(cashFlowData,HistoricalCFTablePrompt)
+  //   console.log("this is the response",response) 
+  //   cashFlowResult = response.historical_cash_flow_table
     
-  }
+  // }
 
   console.log("Historical  tables completed ✅✅✅ ") 
 
-  return {ProfitAndLoss:pandlResult}
+  return {ProfitAndLoss:pandlResult,BalanceSheet:balanceSheetResult}
 
 }
 
@@ -132,5 +132,5 @@ export async function POST(req:NextRequest){
 
 
 
-    return NextResponse.json({ProfitAndLoss:result.ProfitAndLoss})
+    return NextResponse.json({ProfitAndLoss:result.ProfitAndLoss,BalanceSheet:result.BalanceSheet})
 }

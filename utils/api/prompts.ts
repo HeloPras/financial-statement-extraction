@@ -154,7 +154,6 @@ Begin classification and extraction now.
 
 `
 
-
 export const PandLJSONConverter =  `
 You are a deterministic table-structuring engine.
 
@@ -313,6 +312,8 @@ If all rows fail, return:
 Begin structuring now.
 
 `
+
+
 
 export const BalanceSheetTextExtraction = `
 PHASE 1: PAGE IDENTIFICATION (SOFT GATE WITH EXCLUSIONS)
@@ -666,6 +667,8 @@ If all rows fail, return:
 Begin structuring now.
 `
 
+
+
 export const CashFlowTextExtraction = `
 
 PHASE 1: PAGE IDENTIFICATION (SOFT GATE WITH EXCLUSIONS)
@@ -843,7 +846,6 @@ FAILURE CONDITIONS
 Begin classification and extraction now.
 
 `  
-
 
 export const CashFlowJSONConverter = `
 
@@ -1027,6 +1029,8 @@ Begin structuring now.
 
 
 `
+
+
 
 
 export const HistoricalPLTablePrompt = `

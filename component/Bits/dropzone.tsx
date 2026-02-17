@@ -52,9 +52,7 @@ const DropZone: React.FC<DropZoneProps> = ({
     workbook: null,
   })
 
-  useEffect(() => {
-    console.log(files)
-  }, [files])
+
 
   const [extractTables, setExtractTables] = useState<ExtractTableTypes>({
     Historical:false,
@@ -62,6 +60,10 @@ const DropZone: React.FC<DropZoneProps> = ({
     BalanceSheet: true,
     CashFlow: true,
   })
+
+  useEffect(() => {
+    console.log("this is the extract table", extractTables)
+  }, [extractTables])
 
 const selectedCount = useMemo(() => {
   return TABLES.filter((k) => extractTables[k]).length
@@ -1692,6 +1694,7 @@ let responseData = []
       setExtractTables((prev) => ({
         ...prev,
         Historical: v,
+        CashFlow: false
       }))
     }}
     className="h-4 w-4"
@@ -1702,6 +1705,7 @@ let responseData = []
 <label className="flex items-center gap-2 text-sm text-gray-700 select-none">
   <input
     type="checkbox"
+    disabled = {extractTables.Historical}
     checked={allChecked}
     ref={(el) => {
       if (el) el.indeterminate = someChecked
@@ -1737,6 +1741,7 @@ let responseData = []
                       <input
                         type="checkbox"
                         checked={checked}
+                        disabled={extractTables.Historical && k === "CashFlow"}
                         onChange={(e) =>
                           setExtractTables({
                             ...extractTables,
@@ -1748,8 +1753,7 @@ let responseData = []
                       {k === "PandL"
                         ? "P&L"
                         : k === "BalanceSheet"
-                          ? "Balance Sheet"
-                          : "Cash Flow"}
+                          ? "Balance Sheet":"Cash Flow"}
                     </label>
                   )
                 })}
